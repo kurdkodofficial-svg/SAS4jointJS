@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAS4jointJS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Kufi+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- JointJS & Dependencies -->
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/3.7.7/joint.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/backbone/1.4.1/backbone-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jointjs/3.7.7/joint.min.js"></script>
+
+<style>
+:root{
+  --navy:#0d1b2a; --ink:#1c2b3a; --muted:#5b6b7b;
+  --gold:#f5b301; --gold-dark:#d99e00;
+  --bg:#f7f9fb; --card:#fff; --line:#e3e9ef; --wa:#25d366;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter','Noto Kufi Arabic',Tahoma,sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+.container{max-width:1080px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:0;z-index:50;background:rgba(13,27,42,.94);backdrop-filter:blur(8px)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+.logo{color:#fff;font-weight:800;font-size:1.15rem}
+.logo b{color:var(--gold)}
+.nav-links{display:flex;gap:22px}
+.nav-links a{color:#cfd8e3;text-decoration:none;font-size:.92rem;font-weight:600}
+.nav-links a:hover{color:var(--gold)}
+.lang-switch{display:flex;gap:4px;background:rgba(255,255,255,.08);padding:4px;border-radius:99px}
+.lang-switch button{border:0;background:transparent;color:#cfd8e3;padding:5px 12px;border-radius:99px;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:600}
+.lang-switch button.active{background:var(--gold);color:var(--navy)}
+
+/* Hero Section */
+.hero{background:linear-gradient(135deg,#0d1b2a,#1b3a5c);color:#fff;padding:90px 0 100px;text-align:center}
+.hero h1{font-size:2.6rem;line-height:1.35;margin-bottom:16px}
+.hl{color:var(--gold)}
+.hero p{max-width:640px;margin:0 auto 32px;color:#c3cfdb;font-size:1.08rem}
+.btn-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-block;padding:13px 30px;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;cursor:pointer;border:0;font-family:inherit;transition:.2s}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:hover{background:var(--gold-dark)}
+.btn-wa{background:var(--wa);color:#fff}
+.btn-wa:hover{filter:brightness(.92)}
+
+/* Services Section */
+section{padding:70px 0}
+.sec-title{text-align:center;font-size:1.9rem;margin-bottom:8px}
+.sec-sub{text-align:center;color:var(--muted);margin-bottom:44px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px;box-shadow:0 2px 10px rgba(13,27,42,.04);transition:.2s}
+.card:hover{transform:translateY(-4px);border-color:var(--gold)}
+.card .ico{width:46px;height:46px;border-radius:12px;background:#fdf3d7;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:16px}
+.card h3{font-size:1.08rem;margin-bottom:8px}
+.card p{color:var(--muted);font-size:.95rem}
+
+/* Interactive JointJS Demo Section */
+.demo-sec{background:#eef3f8;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.demo-box{background:#fff;border-radius:16px;border:1px solid var(--line);overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.05)}
+.demo-toolbar{background:var(--navy);padding:12px 20px;display:flex;gap:10px;align-items:center}
+.demo-toolbar button{padding:8px 14px;background:var(--gold);color:var(--navy);border:0;border-radius:6px;font-weight:bold;cursor:pointer;font-family:inherit;font-size:.85rem}
+#paper{width:100%;height:350px;background:#f8fafc}
+
+/* Pricing Section */
+.pricing{background:var(--navy)}
+.pricing .sec-title{color:#fff}
+.pricing .sec-sub{color:#9fb0c0}
+.price-card{max-width:420px;margin:30px auto 0;background:#fff;color:var(--ink);border-radius:18px;padding:40px 34px;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.35);position:relative}
+.badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);font-weight:700;font-size:.8rem;padding:5px 16px;border-radius:99px;white-space:nowrap}
+.amount{font-size:3rem;font-weight:800;color:var(--navy)}
+.amount small{font-size:1.1rem;font-weight:600;color:var(--muted)}
+.period{color:var(--muted);margin-bottom:24px}
+.perks{list-style:none;text-align:start;margin-bottom:28px}
+.perks li{padding:9px 0;border-bottom:1px dashed var(--line);font-size:.95rem}
+.perks li::before{content:"✓";color:var(--gold-dark);font-weight:800;margin-inline-end:10px}
+.price-card .btn{width:100%}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px}
+.step .num{width:40px;height:40px;border-radius:50%;background:var(--navy);color:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:16px}
+.step h3{font-size:1.05rem;margin-bottom:6px}
+.step p{color:var(--muted);font-size:.93rem;margin-bottom:14px}
+.phone-chip{display:flex;align-items:center;gap:8px;background:#f1f5f9;border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.phone-chip .pn{direction:ltr;font-weight:700;font-size:.95rem;letter-spacing:.5px}
+.copy-btn{margin-inline-start:auto;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:.78rem;cursor:pointer;color:var(--muted);font-family:inherit}
+.copy-btn:hover{border-color:var(--gold);color:var(--gold-dark)}
+
+footer{background:var(--navy);color:#9fb0c0;padding:40px 0;text-align:center;font-size:.9rem}
+footer a{color:var(--gold);text-decoration:none}
+@media(max-width:720px){.nav-links{display:none}.hero h1{font-size:1.9rem}.hero{padding:60px 0 70px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <div class="logo">SAS<b>4</b>jointJS</div>
+    <nav class="nav-links">
+      <a href="#services" data-i18n="nav_services">خزمەتگوزارییەکان</a>
+      <a href="#pricing" data-i18n="nav_pricing">بەشداری</a>
+      <a href="#how" data-i18n="nav_how">چۆنیشی</a>
+    </nav>
+    <div class="lang-switch">
+      <button data-lang="ku" class="active">کوردی</button>
+      <button data-lang="ar">عربي</button>
+      <button data-lang="en">EN</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <h1><span class="hl">SAS4jointJS</span> <span data-i18n="hero_title"></span></h1>
+    <p data-i18n="hero_sub"></p>
+    <div class="btn-row">
+      <a href="#pricing" class="btn btn-gold" data-i18n="cta_join"></a>
+      <a id="waHero" href="#" class="btn btn-wa" target="_blank" data-i18n="cta_wa"></a>
+    </div>
+  </div>
+</section>
+
+<!-- Services Section -->
+<section id="services">
+  <div class="container">
+    <h2 class="sec-title" data-i18n="serv_title">خزمەتگوزارییە سەرەکییەکان</h2>
+    <p class="sec-sub" data-i18n="serv_sub">بە بەشداربوونی مانگانە دەستگەیشتنی تەواوت بەم ئامرازانە دەبێت</p>
+    <div class="grid">
+      <div class="card"><div class="ico">📐</div><h3 data-i18n="s1_t">کێشانی دیاگرام و فڵۆچارت</h3><p data-i18n="s1_d">کێشانی نەخشەی پرۆسەکان و دیاگرامی کارلێککار بۆ سیستەمەکانت.</p></div>
+      <div class="card"><div class="ico">🌳</div><h3 data-i18n="s2_t">نەخشەی ڕێکخراوەیی</h3><p data-i18n="s2_d">دروستکردنی Org Charts و نەخشەی پەیوەندییەکان بە شێوەی درەخت.</p></div>
+      <div class="card"><div class="ico">🔄</div><h3 data-i18n="s3_t">بزوێنەری ئۆتۆمەی شەن</h3><p data-i18n="s3_d">بنیاتنانی ڕێڕەوی کار و بڕیارەکان (Workflow Builder).</p></div>
+      <div class="card"><div class="ico">📥</div><h3 data-i18n="s4_t">داگرتن و خەزنکردن</h3><p data-i18n="s4_d">دەرهێنانی نەخشەکان بە شێوەی وێنە (PNG) یان فایلی ڤێکتەر (SVG).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- JointJS Demo Interactive Canvas -->
+<section class="demo-sec">
+  <div class="container">
+    <h2 class="sec-title" data-i18n="demo_title">تاقیکردنەوەی بزوێنەری JointJS</h2>
+    <p class="sec-sub" data-i18n="demo_sub">کلیک بوبکە لەسەر بەشەکان بۆ تاقیکردنەوەی ڕاکێشان و کێشان</p>
+    <div class="demo-box">
+      <div class="demo-toolbar">
+        <button onclick="addRect()">+ چوارگۆشە</button>
+        <button onclick="addCircle()">+ بازنە</button>
+        <button onclick="clearCanvas()" style="margin-inline-start:auto; background:#e74c3c; color:#fff;">سڕینەوە</button>
+      </div>
+      <div id="paper"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="pricing">
+  <div class="container">
+    <h2 class="sec-title" data-i18n="price_title"></h2>
+    <p class="sec-sub" data-i18n="price_sub"></p>
+    <div class="price-card">
+      <div class="badge" data-i18n="badge"></div>
+      <div class="amount"><span data-i18n="amount"></span> <small data-i18n="currency"></small></div>
+      <div class="period" data-i18n="period"></div>
+      <ul class="perks">
+        <li data-i18n="perk1"></li>
+        <li data-i18n="perk2"></li>
+        <li data-i18n="perk3"></li>
+      </ul>
+      <a id="waPrice" href="#" class="btn btn-gold" target="_blank" data-i18n="join_btn"></a>
+    </div>
+  </div>
+</section>
+
+<!-- How to join -->
+<section id="how">
+  <div class="container">
+    <h2 class="sec-title" data-i18n="how_title"></h2>
+    <p class="sec-sub" data-i18n="how_sub"></p>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h3 data-i18n="s1_t"></h3>
+        <p data-i18n="s1_d"></p>
+        <div class="phone-chip"><span class="pn">+964 750 490 9260</span><button class="copy-btn" data-copy data-i18n="copy"></button></div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3 data-i18n="s2_t"></h3>
+        <p data-i18n="s2_d"></p>
+        <div class="phone-chip"><span class="pn">+964 750 490 9260</span><button class="copy-btn" data-copy data-i18n="copy"></button></div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3 data-i18n="s3_t"></h3>
+        <p data-i18n="s3_d"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p><a id="waFoot" href="#" target="_blank">WhatsApp: +964 750 490 9260</a></p>
+    <p data-i18n="footer"></p>
+  </div>
+</footer>
+
+<script>
+const PHONE = '+9647504909260';
+const T = {
+ku:{
+ nav_services:"خزمەتگوزارییەکان",nav_pricing:"بەشداری",nav_how:"چۆنیشی",
+ hero_title:"— بۆ کارەکەت دروستکراوە",
+ hero_sub:"پلاتفۆرمێکی پیشەیی بە بزوێنەری JointJS بۆ کێشانی دیاگرام. بە بەشداری مانگانە دەستپێبکە.",
+ cta_join:"ئێستا بەشدار بە",cta_wa:"پەیوەندی بە واتسئاپ",
+ serv_title:"خزمەتگوزارییە سەرەکییەکان",serv_sub:"بە بەشداربوونی مانگانە دەستگەیشتنی تەواوت بەم ئامرازانە دەبێت",
+ s1_t:"کێشانی دیاگرام و فڵۆچارت",s1_d:"کێشانی نەخشەی پرۆسەکان و دیاگرامی کارلێککار بۆ سیستەمەکانت.",
+ s2_t:"نەخشەی ڕێکخراوەیی",s2_d:"دروستکردنی Org Charts و نەخشەی پەیوەندییەکان بە شێوەی درەخت.",
+ s3_t:"بزوێنەری ئۆتۆمەی شەن",s3_d:"بنیاتنانی ڕێڕەوی کار و بڕیارەکان (Workflow Builder).",
+ s4_t:"داگرتن و خەزنکردن",s4_d:"دەرهێنانی نەخشەکان بە شێوەی وێنە (PNG) یان فایلی ڤێکتەر (SVG).",
+ demo_title:"تاقیکردنەوەی کارلێککاری JointJS",demo_sub:"دەتوانیت شێوەکان ڕابکێشیت یان شێوەی نوێ زیاد بکەیت",
+ price_title:"بەشداری",price_sub:"نرخێکی یەکسان بۆ هەمووان",
+ badge:"هەڵبژاردەی گشتی",amount:"٤٥٬٠٠٠",currency:"دینار",period:"هەر مانگێک",
+ perk1:"دەستگەیشتن بە هەموو خزمەتگوزارییەکان",perk2:"پشتگیری واتسئاپ",perk3:"هەر کاتێک بڕیخەرەوە",
+ join_btn:"پارە بدە و ببەسترەوە",
+ how_title:"چۆن بەشداری بکەیت",how_sub:"درێژایی ٣ هەنگاوی سادە",
+ s1_t:"پارەکە بنێرە",s1_d:"٤٥٬٠٠٠ دینار بۆ ئەژماری FIB یان FastPay بنێرە:",
+ s2_t:"پسوولەکە بنێرە",s2_d:"وێنەی پسوولەی پارەدان بنێرە بۆ واتسئاپی هەمان ژمارە:",
+ s3_t:"ئەپروڤ و چالاککردن",s3_d:"دوای ئەپروڤکردن، هەژمارەکەت دەکرێتە چالاک.",
+ copy:"هەڵگرتن",copied:"هەڵگیرا ✓",
+ wa_msg:"سڵاو، دەمەوێت بەشداری SAS4jointJS بکەم. پسوولەی پارەدان دەنێرم.",
+ footer:"© 2026 SAS4jointJS — هەموو مافەکان پارێزراون"
+},
+ar:{
+ nav_services:"الخدمات",nav_pricing:"الاشتراك",nav_how:"طريقة الاشتراك",
+ hero_title:"— صُنع من أجل عملك",
+ hero_sub:"منصة احترافية بمحرك JointJS لرسم المخططات. ابدأ الآن مع اشتراك شهري بسيط.",
+ cta_join:"اشترك الآن",cta_wa:"تواصل عبر واتساب",
+ serv_title:"الخدمات الرئيسية",serv_sub:"احصل على وصول كامل لهذه الأدوات مع اشتراكك الشهري",
+ s1_t:"رسم المخططات وسير العمل",s1_d:"رسم مخططات العمليات والنظم التفاعلية بسهولة.",
+ s2_t:"الهيكل التنظيمي",s2_d:"إنشاء خرائط الهياكل التنظيمية (Org Charts) بشكل شجري.",
+ s3_t:"محرك الأتمتة",s3_d:"بناء مسارات القرارات وخطوات العمل التلقائية.",
+ s4_t:"التصدير والحفظ",s4_d:"تصدير التصاميم بصيغ صور high-quality أو SVG.",
+ demo_title:"تجربة محرك JointJS",demo_sub:"يمكنك سحب وإفلات العناصر أو إضافة عناصر جديدة",
+ price_title:"الاشتراك",price_sub:"سعر واحد للجميع",
+ badge:"الاختيار الأشهر",amount:"٤٥٬٠٠٠",currency:"دينار",period:"شهرياً",
+ perk1:"الوصول إلى جميع الخدمات",perk2:"دعم عبر واتساب",perk3:"إلغاء في أي وقت",
+ join_btn:"ادفع واشترك",
+ how_title:"كيف تشترك",how_sub:"ثلاث خطوات بسيطة",
+ s1_t:"حوّل المبلغ",s1_d:"حوّل ٤٥٬٠٠٠ دينار إلى حساب FIB أو FastPay:",
+ s2_t:"أرسل الإيصال",s2_d:"أرسل صورة إيصال الدفع إلى واتساب على نفس الرقم:",
+ s3_t:"الموافقة والتفعيل",s3_d:"بعد الموافقة، يتم تفعيل حسابك مباشرة.",
+ copy:"نسخ",copied:"تم النسخ ✓",
+ wa_msg:"مرحباً، أريد الاشتراك في SAS4jointJS. سأرسل إيصال الدفع.",
+ footer:"© 2026 SAS4jointJS — جميع الحقوق محفوظة"
+},
+en:{
+ nav_services:"Services",nav_pricing:"Pricing",nav_how:"How it works",
+ hero_title:"— built for your work",
+ hero_sub:"A professional platform powered by JointJS engine for diagramming. Simple monthly plan.",
+ cta_join:"Join now",cta_wa:"Chat on WhatsApp",
+ serv_title:"Main Services",serv_sub:"Get full access to all these tools with your monthly plan",
+ s1_t:"Diagram & Flowchart Builder",s1_d:"Draw interactive flowcharts and system process diagrams easily.",
+ s2_t:"Organizational Charts",s2_d:"Build professional Org Charts and structure trees.",
+ s3_t:"Workflow Builder",s3_d:"Design automated decision paths and business logic.",
+ s4_t:"Export & Save",s4_d:"Export your designs in PNG, SVG, or JSON formats.",
+ demo_title:"JointJS Interactive Demo",demo_sub:"Drag elements around or add new shapes to test the engine",
+ price_title:"Membership",price_sub:"One price for everyone",
+ badge:"Most popular",amount:"45,000",currency:"IQD",period:"per month",
+ perk1:"Access to all services",perk2:"WhatsApp support",perk3:"Cancel anytime",
+ join_btn:"Pay & join",
+ how_title:"How to join",how_sub:"Three simple steps",
+ s1_t:"Send the payment",s1_d:"Transfer 45,000 IQD to our FIB or FastPay account:",
+ s2_t:"Send the receipt",s2_d:"Send a photo of the payment receipt to WhatsApp on the same number:",
+ s3_t:"Approval & activation",s3_d:"Once approved, your account is activated right away.",
+ copy:"Copy",copied:"Copied ✓",
+ wa_msg:"Hi, I'd like to join SAS4jointJS. I'll send my payment receipt.",
+ footer:"© 2026 SAS4jointJS — All rights reserved"
+}};
+
+function setLang(l){
+  const t = T[l];
+  document.documentElement.lang = l;
+  document.documentElement.dir = (l === 'en') ? 'ltr' : 'rtl';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (t[k] !== undefined) el.textContent = t[k];
+  });
+  const wa = 'https://wa.me/9647504909260?text=' + encodeURIComponent(t.wa_msg);
+  ['waHero','waPrice','waFoot'].forEach(id => {
+    const e = document.getElementById(id);
+    if (e) e.href = wa;
+  });
+  document.querySelectorAll('.lang-switch button').forEach(b =>
+    b.classList.toggle('active', b.dataset.lang === l));
+  try { localStorage.setItem('sas_lang', l); } catch(e){}
+}
+document.querySelectorAll('.lang-switch button').forEach(b =>
+  b.addEventListener('click', () => setLang(b.dataset.lang)));
+document.querySelectorAll('[data-copy]').forEach(btn =>
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText(PHONE).then(() => {
+      const old = btn.textContent;
+      btn.textContent = T[document.documentElement.lang].copied;
+      setTimeout(() => btn.textContent = old, 1500);
+    });
+  }));
+let saved = 'ku';
+try { saved = localStorage.getItem('sas_lang') || 'ku'; } catch(e){}
+setLang(saved);
+
+/* JointJS Demo Code Initialization */
+var graph = new joint.dia.Graph();
+var paper = new joint.dia.Paper({
+    el: document.getElementById('paper'),
+    model: graph,
+    width: '100%',
+    height: 350,
+    gridSize: 10,
+    drawGrid: true,
+    background: { color: '#f8fafc' }
+});
+
+function addRect() {
+    var rect = new joint.shapes.standard.Rectangle();
+    rect.position(80, 50);
+    rect.resize(120, 60);
+    rect.attr({
+        body: { fill: '#1b3a5c', rx: 6, ry: 6 },
+        label: { text: 'پرۆسە', fill: 'white' }
+    });
+    rect.addTo(graph);
+}
+
+function addCircle() {
+    var circle = new joint.shapes.standard.Circle();
+    circle.position(240, 50);
+    circle.resize(70, 70);
+    circle.attr({
+        body: { fill: '#f5b301', strokeWidth: 0 },
+        label: { text: 'دەستپێک', fill: '#0d1b2a', fontWeight: 'bold' }
+    });
+    circle.addTo(graph);
+}
+
+function clearCanvas() { graph.clear(); }
+
+// Pre-load default shapes into demo
+addCircle();
+addRect();
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ckb">
+<head><base target="_top"><meta charset="utf-8">
+<style>
+ body{font-family:Tahoma,sans-serif;background:#f7f9fb;margin:0;color:#1c2b3a}
+ .box{max-width:460px;margin:40px auto;background:#fff;border-radius:16px;padding:30px;box-shadow:0 4px 20px rgba(13,27,42,.08)}
+ h1{font-size:1.3rem}h1 b{color:#d99e00}
+ label{display:block;margin:14px 0 4px;font-weight:bold;font-size:.9rem}
+ input{width:100%;padding:10px;border:1px solid #d7dee6;border-radius:8px;font-family:inherit;font-size:.95rem;box-sizing:border-box}
+ button{width:100%;margin-top:20px;padding:13px;background:#f5b301;border:0;border-radius:10px;font-weight:bold;font-size:1rem;cursor:pointer}
+ .code{font-size:1.5rem;font-weight:800;color:#0d1b2a;background:#fdf3d7;padding:12px;border-radius:10px;margin:14px 0;letter-spacing:1px;text-align:center}
+ .wa{background:#25d366;color:#fff;text-decoration:none;display:block;text-align:center;padding:12px;border-radius:10px;margin-top:14px;font-weight:bold}
+ .hint{color:#5b6b7b;font-size:.85rem;margin-top:8px}
+</style></head>
+<body>
+<div class="box" id="formBox">
+ <h1><b>SAS4</b>jointJS — بەشداری</h1>
+ <p class="hint">مانگانە: ٤٥٬٠٠٠ دینار — FIB یان FastPay بۆ +964 750 490 9260</p>
+ <label>ناوی تەواو</label><input id="name">
+ <label>ژمارەی مۆبایل</label><input id="phone" inputmode="tel" placeholder="+964...">
+ <label>وێنەی پسوولەی پارەدان</label><input id="file" type="file" accept="image/*">
+ <label>تێبینی (ئارەزوومەندانە)</label><input id="note">
+ <button id="go" onclick="send()">ناردن</button>
+ <p class="hint" id="err"></p>
+</div>
+<div class="box" id="doneBox" style="display:none;text-align:center">
+ <h1>✓ نێردرا</h1>
+ <p>کۆدی تۆ:</p><div class="code" id="cid"></div>
+ <p class="hint">کاتێک پارەکە دەنێریت، ئەم کۆدە بنووسە لە قەبارەی گواستنەوەدا، پاشان ئەم پەیامە بنێرە بۆ واتسئاپەکەمان:</p>
+ <a class="wa" id="wa" target="_blank">ناردنی پەیام بۆ واتسئاپ</a>
+</div>
+<script>
+function send(){
+ var n=document.getElementById('name').value.trim(),
+     p=document.getElementById('phone').value.trim(),
+     f=document.getElementById('file').files[0];
+ if(!n||!p)return err('ناو و ژمارە بنووسە');
+ if(!f)return err('وێنەی پسوولەکە زیاد بکە');
+ if(f.size>4*1024*1024)return err('وێنەکە لە ٤MB زۆرترە');
+ var b=document.getElementById('go');b.disabled=true;b.textContent='دەنێرێت...';
+ var r=new FileReader();
+ r.onload=function(){
+  google.script.run
+   .withSuccessHandler(function(res){
+    if(res&&res.ok){
+     document.getElementById('formBox').style.display='none';
+     document.getElementById('doneBox').style.display='block';
+     document.getElementById('cid').textContent=res.id;
+     document.getElementById('wa').href='https://wa.me/9647504909260?text='+
+      encodeURIComponent('سڵاو، بۆ SAS4jointJS پارە داوم. کۆد: '+res.id+'، ناو: '+n);
+    } else err((res&&res.error)||'هەڵە ڕوویدا، دووبارە هەوڵ بدەرە');
+   })
+   .withFailureHandler(function(e){err(String(e))})
+   .submitJoin(n,p,r.result.split(',')[1],f.type,f.name,document.getElementById('note').value);
+ };
+ r.readAsDataURL(f);
+}
+function err(m){document.getElementById('err').textContent=m}
+</script>
+</body></html>

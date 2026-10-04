@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ckb">
+<head><base target="_top"><meta charset="utf-8">
+<style>
+ body{font-family:Tahoma,sans-serif;background:#0d1b2a;margin:0;color:#e8eef4}
+ .wrap{max-width:760px;margin:0 auto;padding:20px}
+ h1{font-size:1.2rem}h1 b{color:#f5b301}
+ .tabs{display:flex;gap:8px;margin:16px 0}
+ .tabs button{flex:1;padding:10px;border:0;border-radius:8px;background:#1b3a5c;color:#cfd8e3;font-weight:bold;cursor:pointer}
+ .tabs button.on{background:#f5b301;color:#0d1b2a}
+ .card{background:#132536;border:1px solid #23415f;border-radius:12px;padding:16px;margin-bottom:12px}
+ .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+ img.rcpt{max-height:110px;border-radius:8px;cursor:pointer}
+ .btns button{border:0;border-radius:8px;padding:8px 16px;font-weight:bold;cursor:pointer;margin-inline-start:6px}
+ .ap{background:#25d366;color:#fff}.rj{background:#3a4a5c;color:#fff}
+ .wa{display:inline-block;background:#25d366;color:#fff;text-decoration:none;padding:8px 16px;border-radius:8px;font-weight:bold;margin-top:8px}
+ .empty{color:#7d8fa3;text-align:center;padding:30px}
+ #gate{max-width:340px;margin:80px auto}
+ #gate input{width:100%;padding:12px;border-radius:8px;border:0;font-size:1rem}
+ #bar{display:none;position:fixed;bottom:0;right:0;left:0;background:#132536;padding:14px;border-top:2px solid #f5b301;z-index:9}
+ #bar textarea{width:100%;min-height:70px;background:#0d1b2a;color:#e8eef4;border:1px solid #23415f;border-radius:8px;padding:8px;font-family:inherit;box-sizing:border-box}
+</style></head>
+<body>
+<div class="wrap">
+ <div id="gate">
+  <h1><b>SAS4</b>jointJS — بەڕێوەبردن</h1>
+  <input id="k" placeholder="کلیسی چوونەژوورەوە"><br>
+  <button class="ap" style="margin-top:10px;width:100%;border:0;border-radius:8px;padding:12px;font-weight:bold;cursor:pointer" onclick="login()">چوونەژوورەوە</button>
+ </div>
+ <div id="app" style="display:none">
+  <h1><b>SAS4</b>jointJS — بەڕێوەبردن</h1>
+  <div class="tabs">
+   <button id="t-pending" class="on" onclick="tab('pending')">چاوەڕوان</button>
+   <button id="t-active" onclick="tab('active')">چالاک</button>
+   <button id="t-expiring" onclick="tab('expiring')">نزیکە لە کۆتایی</button>
+  </div>
+  <div id="list"></div>
+ </div>
+</div>
+<div id="bar">
+ <textarea id="bt"></textarea>
+ <a class="wa" id="ba" target="_blank">ناردن بە واتسئاپ</a>
+</div>
+<script>
+var KEY='<?= key ?>', ACCESS='<?= accessLink ?>', ALL=[];
+function login(){sessionStorage.setItem('sas_key',document.getElementById('k').value);load()}
+if(sessionStorage.getItem('sas_key')){KEY=sessionStorage.getItem('sas_key');load()}
+function load(){
+ google.script.run.withSuccessHandler(function(res){
+  if(!res.ok){alert('کلیل هەڵەیە');return}
+  ALL=res.rows;
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+  render();
+ }).dashboard(KEY);
+}
+var MODE='pending';
+function tab(m){MODE=m;['pending','active','expiring'].forEach(function(x){
+ document.getElementById('t-'+x).classList.toggle('on',x===m)});render()}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+ return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function digits(p){return String(p).replace(/\D/g,'')}
+function render(){
+ var now=Date.now(),el=document.getElementById('list'),h='';
+ var rows=ALL.filter(function(r){
+  if(MODE==='pending')return r.status==='pending';
+  if(MODE==='active')return r.status==='active';
+  return r.status==='active'&&r.expiresAt&&new Date(r.expiresAt)-now<7*864e5;
+ });
+ if(!rows.length){el.innerHTML='<div class="empty">هیچ شتێک نییە</div>';return}
+ rows.forEach(function(r){
+  h+='<div class="card"><div class="row"><div><b>'+esc(r.name)+'</b> · '+esc(r.phone)+
+   '<br><small style="color:#7d8fa3">'+r.id+' · '+new Date(r.submittedAt).toLocaleDateString('ku-IQ')+
+   (r.expiresAt?' · کۆتایی: '+new Date(r.expiresAt).toLocaleDateString('ku-IQ'):'')+'</small></div>';
+  h+=r.receiptUrl?'<img class="rcpt" src="'+esc(r.receiptUrl)+'" onclick="window.open(this.src)">':'';
+  h+='</div>';
+  if(r.status==='pending')
+   h+='<div class="btns"><button class="ap" onclick="act(\''+r.id+'\',\'approve\')">ئەپروڤ ✓</button>'+
+      '<button class="rj" onclick="act(\''+r.id+'\',\'reject\')">ڕەتکردنەوە</button></div>';
+  if(r.status==='active')
+   h+='<a class="wa" target="_blank" href="https://wa.me/'+digits(r.phone)+'?text='+
+      encodeURIComponent('سڵاو '+r.name+'، بەشداری SAS4jointJS تۆ نزیکە لە کۆتایی هاتن. بۆ نوێکردنەوە ٤٥٬٠٠٠ دینار بنێرە بۆ هەمان ژمارە و پسوولەکە بنێرە.')+'">ئاگاداری نوێکردنەوە</a>';
+  h+='</div>';
+ });
+ el.innerHTML=h;
+}
+function act(id,a){
+ google.script.run.withSuccessHandler(function(res){
+  if(!res.ok){alert((res&&res.error)||'هەڵە');return}
+  if(a==='approve'){
+   var r=null;ALL.forEach(function(x){if(x.id===id)r=x});
+   showWa(r.phone,'سڵاو '+r.name+'،\nپارەدانەکەت پشتڕاست کرایەوە ✓\n\nدەستگەیشتنت:\n'+ACCESS+'\n\n— SAS4jointJS');
+  }
+  render();
+ }).act(id,a,KEY);
+}
+function showWa(phone,text){
+ var bar=document.getElementById('bar');
+ bar.style.display='block';
+ document.getElementById('bt').value=text;
+ document.getElementById('ba').href='https://wa.me/'+digits(phone)+'?text='+encodeURIComponent(text);
+ bar.scrollIntoView();
+}
+</script>
+</body></html>
